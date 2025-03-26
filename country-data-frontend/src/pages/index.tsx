@@ -1,75 +1,66 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from "react";
+import Head from "next/head";
+import { useCountries } from "../hooks/useCountries";
 
-export default function Home() {
-  const [countries, setCountries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+import SearchBar from "../components/SearchBar";
+import CountryList from "../components/CountryList";
+import RegionFilter from "../components/RegionFilter";
 
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/countries');
-        setCountries(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load countries');
-        setLoading(false);
-      }
-    };
-    fetchCountries();
-  }, []);
-
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (error) return <p className="text-red-500">{error}</p>;
-
-  const filteredCountries = countries.filter((country: any) =>
-    country.name.includes(searchTerm)
-  );
+const Home: React.FC = () => {
+  const {
+    countries,
+    loading,
+    error,
+    hasMore,
+    loadMore,
+    handleSearch,
+    handleRegionFilter,
+    selectedRegion,
+  } = useCountries();
 
   return (
-    <div className="p-6">
-      {/* Search Input */}
-      <div className="mb-4">
-        <label className="block text-gray-700">
-          Search for a Country
-        </label>
-        <input
-          id="search"
-          type="text"
-          placeholder="Enter country name"
-          className="border border-gray-300"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+    <div className="min-h-screen bg-gradient-to-r from-purple-100 via-orange-100 to-red-100">
+      <Head>
+        <title >Country Data Dashboard</title>
+        <meta
+          name="description"
+          content="Explore countries and their information"
         />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      {/* Fixed search and filter bar */}
+      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-purple-100 via-orange-100 to-red-100  z-10 py-4">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold mb-4 text-center text-rose-500">Country Data Dashboard</h1>
+          <div className="sm:flex sm:items-center sm:justify-center">
+            <SearchBar onSearch={handleSearch} />
+            <RegionFilter
+              selectedRegion={selectedRegion}
+              onRegionChange={handleRegionFilter}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Display filtered countries */}
-      <div className="grid grid-cols-4">
-        {filteredCountries.length > 0 ? (
-          filteredCountries.map((country) => (
-            <div key={country.name} className="bg-white rounded-lg shadow-md p-4">
-              {/* Accessing the flag from the 'flag' property */}
-              {country.flag ? (
-                <img
-                  className="w-10 h-10 object-cover"
-                  src={country.flag}
-                  alt={`Flag of ${country.name}`}
-                />
-              ) : (
-                <p className="text-center">No Flag Available</p>
-              )}
-              <div className="mt-2 text-center">
-                <h2>{country.name}</h2>
-                <p>{country.region}</p>
-              </div>
+      <main>
+        <div className="container mx-auto px-4 py-8 pt-14">
+          {error && (
+            <div className="bg-red-50 p-4 rounded-md mb-6">
+              <p className="text-red-700">{error}</p>
             </div>
-          ))
-        ) : (
-          <p className="text-gray-500">No countries found.</p>
-        )}
-      </div>
+          )}
+
+          <CountryList
+            countries={countries}
+            loading={loading}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+          />
+        </div>
+      </main>
     </div>
   );
 };
+
+export default Home;
