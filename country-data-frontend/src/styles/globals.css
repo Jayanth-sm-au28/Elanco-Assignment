@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom global styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-gray-100;
+}
+
+/* Skeleton loading animation */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
