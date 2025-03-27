@@ -36,16 +36,20 @@ const Home: React.FC = () => {
           <h1 className="xs:text-xl md:text-4xl font-bold mb-4 text-center text-rose-500">
             Country Data Dashboard
           </h1>
-          <div className="flex xs:flex-col md:flex-row justify-around item-center">
-          <RegionFilter
+          <div className="flex xs:flex-col md:flex-row justify-around item-center ">
+            <RegionFilter
               selectedRegion={selectedRegion}
               onRegionChange={handleRegionFilter}
             />
-            <AdvancedSearch onSearch={handleSearch} 
-            resultsCount={countries.length}
-            isSearching={loading} />
-            {/* <SearchBar onSearch={handleSearch} /> */}
+            <div data-testid="mock-search-bar">
+              <AdvancedSearch
+                onSearch={handleSearch}
+                resultsCount={countries.length}
+                isSearching={loading}
+              />
             </div>
+            {/* <SearchBar onSearch={handleSearch} /> */}
+          </div>
         </div>
       </div>
 

@@ -3,13 +3,11 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Layout from '../../components/Layout';
 
-// Mock Next.js Head component
 vi.mock('next/head', () => ({
   __esModule: true,
   default: ({ children }:{children:React.ReactNode}) => <>{children}</>
 }));
 
-// Mock Link component
 vi.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>
@@ -23,13 +21,11 @@ describe('Layout', () => {
       </Layout>
     );
     
-    // Check if the layout renders the children
     expect(screen.getByTestId('test-child')).toBeInTheDocument();
     expect(screen.getByText('Test Content')).toBeInTheDocument();
     
-    // Check if the layout renders the header and footer
-    expect(screen.getByRole('banner')).toBeInTheDocument(); // header
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument(); // footer
+    expect(screen.getByRole('banner')).toBeInTheDocument(); 
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument(); 
   });
   
   it('renders the correct title', () => {

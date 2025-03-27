@@ -63,30 +63,23 @@ export const useCountries = () => {
     }
   }, [searchParams, selectedRegion, page, countries]);
 
-  // Initial load on mount only
   useEffect(() => {
     loadCountries(true);
     isFirstRender.current = false;
-    // Store initial values
     prevSearchParams.current = searchParams;
     prevRegion.current = selectedRegion;
   }, []);
 
-  // Handle changes to search params or region
   useEffect(() => {
-    // Skip on first render since we already load data in the mount effect
     if (isFirstRender.current) return;
     
-    // Compare if search parameters have actually changed
     const searchParamsChanged = JSON.stringify(prevSearchParams.current) !== JSON.stringify(searchParams);
     const regionChanged = prevRegion.current !== selectedRegion;
     
     if (searchParamsChanged || regionChanged) {
-      // Update our refs to new values
       prevSearchParams.current = searchParams;
       prevRegion.current = selectedRegion;
       
-      // Reset pagination and load data
       setPage(1);
       loadCountries(true);
     }
@@ -101,7 +94,6 @@ export const useCountries = () => {
   }, []);
 
   const loadMore = useCallback(() => {
-    // Only load more if we're not already loading and don't have search/filter active
     if (!loading && !Object.keys(searchParams).length && !selectedRegion) {
       loadCountries(false);
     }

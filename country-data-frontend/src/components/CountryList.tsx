@@ -34,7 +34,7 @@ const CountryList: React.FC<CountryListProps> = ({
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 xs:mt-16 sm:mt-0">
+    <div className="container mx-auto px-4 py-8 xs:mt-14 md:mt-24">
       {countries.length === 0 && !loading ? (
         <div className="text-center py-10">
           <p className="text-gray-500 text-lg">

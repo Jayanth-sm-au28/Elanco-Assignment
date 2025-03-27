@@ -51,29 +51,30 @@ describe('useCountries', () => {
     expect(result.current.selectedRegion).toBe('Europe');
   });
   
-  it('should search countries by name', async () => {
-    const { result } = renderHook(() => useCountries());
-    
-    // Wait for initial load
-    await vi.waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-    
-    // Clear initial call count
-    vi.clearAllMocks();
-    
-    // Trigger search
-    act(() => {
-      result.current.handleSearch('Germany');
-    });
-    
-    // Wait for search to apply
-    await vi.waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-    
-    expect(searchCountries).toHaveBeenCalledWith({ name: 'Germany' });
+
+it('should search countries by name', async () => {
+  const { result } = renderHook(() => useCountries());
+  
+  // Wait for initial load
+  await vi.waitFor(() => {
+    expect(result.current.loading).toBe(false);
   });
+  
+  // Clear initial call count
+  vi.clearAllMocks();
+  
+  // Trigger search with object parameter instead of string
+  act(() => {
+    result.current.handleSearch({ name: 'Germany' });
+  });
+  
+  // Wait for search to apply
+  await vi.waitFor(() => {
+    expect(result.current.loading).toBe(false);
+  });
+  
+  expect(searchCountries).toHaveBeenCalledWith({ name: 'Germany' });
+});
   
   it('should load more countries when scrolling', async () => {
     const { result } = renderHook(() => useCountries());

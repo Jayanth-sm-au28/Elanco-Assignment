@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import CountryList from '@/src/components/CountryList';
 
-// IntersectionObserver mock is in setup file
 
 describe('CountryList', () => {
   const mockCountries = [
@@ -27,7 +26,6 @@ describe('CountryList', () => {
       />
     );
     
-    // Should render 2 CountryCard components
     expect(screen.getAllByText(/region:/i)).toHaveLength(2);
     expect(screen.getByText('Germany')).toBeInTheDocument();
     expect(screen.getByText('France')).toBeInTheDocument();
@@ -56,10 +54,8 @@ describe('CountryList', () => {
       />
     );
     
-    // Should show both the countries and the loading indicator
     expect(screen.getByText('Germany')).toBeInTheDocument();
     expect(screen.getByText('France')).toBeInTheDocument();
-    // Check for loading indicator
     const loadingIndicator = document.querySelector('.animate-spin');
     expect(loadingIndicator).toBeInTheDocument();
   });

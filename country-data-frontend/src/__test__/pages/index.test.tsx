@@ -4,9 +4,16 @@ import { describe, it, expect, vi } from 'vitest';
 import Home from '../../pages/index';
 import { useCountries } from '../../hooks/useCountries';
 
-interface SearchBarProps {
-  onSearch: (term: string) => void;
-}
+// interface SearchBarProps {
+//   onSearch: (term: string) => void;
+// }
+
+// interface AdvancedSearchProps {
+//   onSearch: (params: Partial<SearchParams>) => void;
+//   resultsCount: number;
+//   isSearching: boolean;
+//   'data-testid'?: string; // Add this line
+// }
 
 interface RegionFilterProps {
   selectedRegion: string;
@@ -32,11 +39,25 @@ vi.mock('next/head', () => ({
 }));
 
 // Mock the child components
-vi.mock('../../components/SearchBar', () => ({
+// vi.mock('../../components/SearchBar', () => ({
+//   __esModule: true,
+//   default: ({ onSearch }: SearchBarProps) => (
+//     <div className="p-2 rounded-lg xs:mb-0 md:mb-4" data-testid="mock-search-bar">
+//       <button onClick={() => onSearch('test')}>Search</button>
+//     </div>
+//   )
+// }));
+
+
+vi.mock('../../components/AdvanceSearch', () => ({
   __esModule: true,
-  default: ({ onSearch }: SearchBarProps) => (
-    <div data-testid="mock-search-bar">
-      <button onClick={() => onSearch('test')}>Search</button>
+  default: ({ onSearch }) => (
+    <div>
+      <button onClick={() => onSearch({
+       capital: "",
+       name: "",
+       timezone: ""
+      })}>Search</button>
     </div>
   )
 }));
@@ -141,8 +162,11 @@ describe('Home Page', () => {
     
     // Test interaction with child components
     screen.getByText('Search').click();
-    expect(mockHandleSearch).toHaveBeenCalledWith('test');
-    
+    expect(mockHandleSearch).toHaveBeenCalledWith({
+      capital: "",
+      name: "",
+      timezone: "",
+    });    
     screen.getByText('Filter').click();
     expect(mockHandleRegionFilter).toHaveBeenCalledWith('Europe');
     

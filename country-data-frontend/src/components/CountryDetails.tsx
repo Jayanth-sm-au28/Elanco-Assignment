@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-// import { fetchCountryByCode } from '@/src/services/api';
 import { Country } from "@/src/types";
 import { fetchCountryByCode } from "../services/api";
-import BacknavButton from "./BacknavButton";
+
+import Button from "./Button";
 
 const CountryDetail: React.FC = () => {
   const router = useRouter();
@@ -15,7 +15,22 @@ const CountryDetail: React.FC = () => {
   const [country, setCountry] = useState<Country | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const backIcon = (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+      ></path>
+    </svg>
+  );
   useEffect(() => {
     const getCountryDetails = async () => {
       if (!code || typeof code !== "string") return;
@@ -86,14 +101,8 @@ const CountryDetail: React.FC = () => {
   return (
     <div className="container mx-auto h-full px-4 py-8 bg-gradient-to-r from-purple-100 via-orange-100 to-red-100">
       <div className="flex xs:justify-between md:justify-start md:gap-4">
-        <BacknavButton />
-
-        <button
-          onClick={() => router.push("/")}
-          className="flex items-center mb-8 px-4 py-2 bg-gradient-to-r from-purple-500  to-blue-500 shadow rounded  text-white text-base font-bold"
-        >
-          Home
-        </button>
+        <Button title="Back" onClick={() => router.back()} icon={backIcon} />
+        <Button title="Home" onClick={() => router.push("/")} />
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
