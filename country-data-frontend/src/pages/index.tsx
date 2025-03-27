@@ -2,9 +2,10 @@ import React from "react";
 import Head from "next/head";
 import { useCountries } from "../hooks/useCountries";
 
-import SearchBar from "../components/SearchBar";
 import CountryList from "../components/CountryList";
 import RegionFilter from "../components/RegionFilter";
+import AdvancedSearch from "../components/AdvanceSearch";
+// import SearchBar from "../components/SearchBar";
 
 const Home: React.FC = () => {
   const {
@@ -16,12 +17,13 @@ const Home: React.FC = () => {
     handleSearch,
     handleRegionFilter,
     selectedRegion,
+    // onSearch
   } = useCountries();
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-100 via-orange-100 to-red-100">
       <Head>
-        <title >Country Data Dashboard</title>
+        <title>Country Data Dashboard</title>
         <meta
           name="description"
           content="Explore countries and their information"
@@ -29,17 +31,21 @@ const Home: React.FC = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Fixed search and filter bar */}
       <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-purple-100 via-orange-100 to-red-100  z-10 py-4">
         <div className="container mx-auto px-4">
-          <h1 className="xs:text-xl md:text-4xl font-bold mb-4 text-center text-rose-500">Country Data Dashboard</h1>
-          <div className="sm:flex sm:items-center sm:justify-center">
-            <SearchBar onSearch={handleSearch} />
-            <RegionFilter
+          <h1 className="xs:text-xl md:text-4xl font-bold mb-4 text-center text-rose-500">
+            Country Data Dashboard
+          </h1>
+          <div className="flex xs:flex-col md:flex-row justify-around item-center">
+          <RegionFilter
               selectedRegion={selectedRegion}
               onRegionChange={handleRegionFilter}
             />
-          </div>
+            <AdvancedSearch onSearch={handleSearch} 
+            resultsCount={countries.length}
+            isSearching={loading} />
+            {/* <SearchBar onSearch={handleSearch} /> */}
+            </div>
         </div>
       </div>
 

@@ -9,7 +9,9 @@ import BacknavButton from "./BacknavButton";
 const CountryDetail: React.FC = () => {
   const router = useRouter();
   const { code } = router.query;
-
+  const [borderCountryNames, setBorderCountryNames] = useState<{
+    [key: string]: string;
+  }>({});
   const [country, setCountry] = useState<Country | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +24,28 @@ const CountryDetail: React.FC = () => {
         setLoading(true);
         const data = await fetchCountryByCode(code);
         setCountry(data);
+
+        // If there are border countries, fetch their names
+        if (data.borders && data.borders.length > 0) {
+          const borderNames: { [key: string]: string } = {};
+
+          // Fetch each border country's details to get its name
+          const borderPromises = data.borders.map(async (borderCode) => {
+            try {
+              const borderCountry = await fetchCountryByCode(borderCode);
+              borderNames[borderCode] = borderCountry.name;
+            } catch (err) {
+              console.error(
+                `Error fetching border country ${borderCode}:`,
+                err
+              );
+              borderNames[borderCode] = borderCode; // Fallback to code if fetch fails
+            }
+          });
+
+          await Promise.all(borderPromises);
+          setBorderCountryNames(borderNames);
+        }
       } catch (err) {
         console.error(err);
         setError("Failed to load country details. Please try again.");
@@ -160,7 +184,7 @@ const CountryDetail: React.FC = () => {
                       onClick={() => router.push(`/countries/${border}`)}
                       className="px-4 py-1 text-sm bg-white shadow rounded hover:bg-gray-50 transition"
                     >
-                      {border}
+                      {borderCountryNames[border] || border}
                     </button>
                   ))}
                 </div>

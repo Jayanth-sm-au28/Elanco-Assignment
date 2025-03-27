@@ -1,10 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Country } from "@/src/types";
-import {
-  fetchCountries,
-  searchCountries,
-  fetchCountriesByRegion,
-} from "@/src/services/api";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Country } from '@/src/types';
+import { fetchCountries, searchCountries, fetchCountriesByRegion } from '@/src/services/api';
 
 export const useCountries = () => {
   const [countries, setCountries] = useState<Country[]>([]);
@@ -12,170 +8,113 @@ export const useCountries = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("");
-
-  const isFilterActiveRef = useRef<boolean>(false);
-  const mountedRef = useRef<boolean>(false);
-  const wasFilterActiveRef = useRef<boolean>(false);
-  const previousSearchTermRef = useRef<string>("");
-  const previousRegionRef = useRef<string>("");
+  const [searchParams, setSearchParams] = useState<object>({});
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  
+  // Use refs to track previous values and prevent unnecessary API calls
+  const prevSearchParams = useRef<object>({});
+  const prevRegion = useRef<string>('');
+  const isFirstRender = useRef<boolean>(true);
   const isLoadingRef = useRef<boolean>(false);
 
-  const loadCountries = useCallback(
-    async (resetList: boolean = false) => {
-      if (!mountedRef.current || isLoadingRef.current) return;
-
-      isLoadingRef.current = true;
+  const loadCountries = useCallback(async (resetList: boolean = false) => {
+    // Prevent concurrent API calls
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
+    
+    try {
       setLoading(true);
-
-      try {
-        let newCountries: Country[] = [];
-        isFilterActiveRef.current = !!(searchTerm || selectedRegion);
-
-        const justRemovedFilter =
-          wasFilterActiveRef.current && !isFilterActiveRef.current;
-        wasFilterActiveRef.current = isFilterActiveRef.current;
-
-        console.log("Loading countries:", {
-          searchTerm,
-          selectedRegion,
-          resetList,
-          justRemovedFilter,
-        });
-
-        if (searchTerm && selectedRegion) {
-          const regionCountries = await fetchCountriesByRegion(selectedRegion);
-          newCountries = regionCountries.filter(
-            (country) =>
-              country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (country.name &&
-                country.name.toLowerCase().includes(searchTerm.toLowerCase()))
-          );
-          setHasMore(false);
-        } else if (selectedRegion) {
-          newCountries = await fetchCountriesByRegion(selectedRegion);
-          setHasMore(false);
-        } else if (searchTerm) {
-          newCountries = await searchCountries({ name: searchTerm });
-          setHasMore(false);
-        } else {
-          if (justRemovedFilter) {
-            const initialBatch = await fetchCountries(1, 50);
-            newCountries = initialBatch;
-            setHasMore(initialBatch.length >= 50);
-          } else {
-            newCountries = await fetchCountries(resetList ? 1 : page);
-            setHasMore(newCountries.length > 0);
-          }
-        }
-
-        previousSearchTermRef.current = searchTerm;
-        previousRegionRef.current = selectedRegion;
-
-        if (resetList || isFilterActiveRef.current || justRemovedFilter) {
-          setCountries(newCountries);
-        } else {
-          const existingCodes = new Set(countries.map((c) => c.code));
-          const uniqueNewCountries = newCountries.filter(
-            (c) => !existingCodes.has(c.code)
-          );
-          setCountries((prev) => [...prev, ...uniqueNewCountries]);
-        }
-
-        if (!resetList && !isFilterActiveRef.current && !justRemovedFilter) {
-          setPage((prevPage) => prevPage + 1);
-        } else if (justRemovedFilter) {
-          setPage(2);
-        }
-
-        setError(null);
-      } catch (err) {
-        console.error("Error loading countries:", err);
-        setError("Failed to load countries. Please try again.");
-        if (resetList) {
-          setCountries([]);
-        }
-      } finally {
-        if (mountedRef.current) {
-          setLoading(false);
-          isLoadingRef.current = false;
-        }
+      
+      let newCountries: Country[] = [];
+      
+      // Determine which API to call based on active filters
+      const hasSearchFilters = Object.keys(searchParams).length > 0;
+      
+      if (hasSearchFilters) {
+        newCountries = await searchCountries(searchParams);
+        setHasMore(false);
+      } else if (selectedRegion) {
+        newCountries = await fetchCountriesByRegion(selectedRegion);
+        setHasMore(false);
+      } else {
+        newCountries = await fetchCountries(resetList ? 1 : page);
+        setHasMore(newCountries.length > 0);
       }
-    },
-    [page, searchTerm, selectedRegion, countries]
-  );
+      
+      if (resetList) {
+        setCountries(newCountries);
+      } else {
+        const existingCodes = new Set(countries.map(c => c.code));
+        const uniqueNewCountries = newCountries.filter(c => !existingCodes.has(c.code));
+        setCountries(prev => [...prev, ...uniqueNewCountries]);
+      }
+      
+      if (!resetList && !hasSearchFilters && !selectedRegion) {
+        setPage(prevPage => prevPage + 1);
+      }
+      
+      setError(null);
+    } catch (err) {
+      console.error("Error loading countries:", err);
+      setError('Failed to load countries. Please try again.');
+    } finally {
+      setLoading(false);
+      isLoadingRef.current = false;
+    }
+  }, [searchParams, selectedRegion, page, countries]);
+
+  // Initial load on mount only
+  useEffect(() => {
+    loadCountries(true);
+    isFirstRender.current = false;
+    // Store initial values
+    prevSearchParams.current = searchParams;
+    prevRegion.current = selectedRegion;
+  }, []);
+
+  // Handle changes to search params or region
+  useEffect(() => {
+    // Skip on first render since we already load data in the mount effect
+    if (isFirstRender.current) return;
+    
+    // Compare if search parameters have actually changed
+    const searchParamsChanged = JSON.stringify(prevSearchParams.current) !== JSON.stringify(searchParams);
+    const regionChanged = prevRegion.current !== selectedRegion;
+    
+    if (searchParamsChanged || regionChanged) {
+      // Update our refs to new values
+      prevSearchParams.current = searchParams;
+      prevRegion.current = selectedRegion;
+      
+      // Reset pagination and load data
+      setPage(1);
+      loadCountries(true);
+    }
+  }, [searchParams, selectedRegion, loadCountries]);
+
+  const handleSearch = useCallback((params: object) => {
+    setSearchParams(params);
+  }, []);
 
   const handleRegionFilter = useCallback((region: string) => {
-    console.log("Region filter changed:", region);
-
-    const isClearing = previousRegionRef.current !== "" && region === "";
-
     setSelectedRegion(region);
-
-    if (isClearing) {
-      wasFilterActiveRef.current = true;
-    }
-  }, []);
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    loadCountries(true).catch((err) => {
-      console.error("Initial load error:", err);
-    });
-
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mountedRef.current) return;
-
-    if (
-      previousSearchTermRef.current === "" &&
-      previousRegionRef.current === "" &&
-      searchTerm === "" &&
-      selectedRegion === ""
-    ) {
-      return;
-    }
-
-    if (
-      searchTerm !== previousSearchTermRef.current ||
-      selectedRegion !== previousRegionRef.current
-    ) {
-      console.log("Search/filter changed, reloading data");
-      setPage(1);
-      loadCountries(true).catch((err) => {
-        console.error("Filter/search load error:", err);
-      });
-    }
-  }, [searchTerm, selectedRegion, loadCountries]);
-
-  const handleSearch = useCallback((term: string) => {
-    console.log("Search term changed:", term);
-    setSearchTerm(term);
   }, []);
 
   const loadMore = useCallback(() => {
-    if (isFilterActiveRef.current || isLoadingRef.current) {
-      return;
+    // Only load more if we're not already loading and don't have search/filter active
+    if (!loading && !Object.keys(searchParams).length && !selectedRegion) {
+      loadCountries(false);
     }
-    loadCountries(false).catch((err) => {
-      console.error("Load more error:", err);
-    });
-  }, [loadCountries]);
+  }, [loadCountries, loading, searchParams, selectedRegion]);
 
   return {
     countries,
     loading,
     error,
-    hasMore: hasMore && !isFilterActiveRef.current,
+    hasMore: hasMore && !Object.keys(searchParams).length && !selectedRegion,
     loadMore,
     handleSearch,
     handleRegionFilter,
-    selectedRegion,
+    selectedRegion
   };
 };
