@@ -61,7 +61,7 @@ const CountryDetail: React.FC = () => {
 
   return (
     <div className="container mx-auto h-full px-4 py-8 bg-gradient-to-r from-purple-100 via-orange-100 to-red-100">
-      <div className="flex gap-10">
+      <div className="flex xs:justify-between md:justify-start md:gap-4">
         <BacknavButton />
 
         <button
@@ -94,7 +94,7 @@ const CountryDetail: React.FC = () => {
           <div className="p-6 md:w-1/2">
             <h1 className="text-3xl font-bold mb-6">{country.name}</h1>
 
-            <div className="grid md:grid-cols-2 gap-y-4 gap-x-8">
+            <div className="grid md:grid-cols-2 gap-y-2 gap-x-4">
               <div>
                 <p className="text-sm text-gray-600">Capital</p>
                 <p className="font-semibold">{country.capital || "N/A"}</p>

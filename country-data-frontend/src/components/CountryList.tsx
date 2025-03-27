@@ -34,7 +34,7 @@ const CountryList: React.FC<CountryListProps> = ({
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 xs:mt-16 sm:mt-0">
       {countries.length === 0 && !loading ? (
         <div className="text-center py-10">
           <p className="text-gray-500 text-lg">
@@ -42,7 +42,7 @@ const CountryList: React.FC<CountryListProps> = ({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
           {countries.map((country, index) => {
             if (countries.length === index + 1 && hasMore) {
               return (

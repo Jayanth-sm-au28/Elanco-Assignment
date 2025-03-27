@@ -23,7 +23,7 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="container mx-auto px-4 py-5">
           <div className="flex justify-center items-center text-center">
             <Link href="/">
-              <p className="xs:text-sm lg:text-3xl font-bold text-center text-rose-500">
+              <p className="xs:text-2xl lg:text-3xl font-bold text-center text-blue-500">
                 Country Data Dashboard
               </p>
             </Link>
